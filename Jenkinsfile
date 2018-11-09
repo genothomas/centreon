@@ -94,7 +94,7 @@ try {
     }
   }
 
-  if (env.BRANCH_NAME == 'master') {
+
     stage('Acceptance tests') {
       parallel 'centos7': {
         node {
@@ -111,6 +111,7 @@ try {
       }
     }
 
+    if (env.BRANCH_NAME == 'master') {
     stage('Delivery') {
       node {
         sh 'setup_centreon_build.sh'
