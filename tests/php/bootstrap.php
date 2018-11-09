@@ -21,3 +21,23 @@ define('_CENTREON_ETC_', realpath('/tmp/'));
 error_reporting(E_ALL & ~E_STRICT);
 
 require_once realpath(dirname(__FILE__) . '/../../vendor/autoload.php');
+
+set_include_path(implode(PATH_SEPARATOR, array(
+    realpath(__DIR__ . '/www/class'),
+    realpath(__DIR__ . '/www/lib'),
+    get_include_path()
+)));
+
+// Centreon Autoload
+spl_autoload_register(function ($sClass) {
+    $fileName = $sClass;
+    $fileName{0} = strtolower($fileName{0});
+    $fileNameType1 = __DIR__ . "/www/class/" . $fileName . ".class.php";
+    $fileNameType2 = __DIR__ . "/www/class/" . $fileName . ".php";
+
+    if (file_exists($fileNameType1)) {
+        require_once $fileNameType1;
+    } elseif (file_exists($fileNameType2)) {
+        require_once $fileNameType2;
+    }
+});
