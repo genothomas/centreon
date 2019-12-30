@@ -1,10 +1,6 @@
 Welcome to Centreon's documentation!
 ====================================
 
-Centreon is open source software which enables you to supervise all the elements comprising your information system.
-
-:ref:`How to reduce your time to monitoring with Centreon IMP ? <impconfiguration>`
-
 Contents:
 
 .. toctree::
@@ -22,7 +18,6 @@ Contents:
    migration/index
    ceip
    faq/index
-   howto/index
    developer/index
    api/index
 

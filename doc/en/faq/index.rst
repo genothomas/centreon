@@ -9,3 +9,5 @@ FAQ
    gdpr_compliance
    administration
    performance
+   remote_server
+   known_issues/index

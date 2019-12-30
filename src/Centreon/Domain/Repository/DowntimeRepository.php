@@ -8,7 +8,7 @@ class DowntimeRepository extends ServiceEntityRepository
 
     /**
      * Export
-     * 
+     *
      * @param int[] $pollerIds
      * @param array $hostTemplateChain
      * @param array $serviceTemplateChain
@@ -56,8 +56,11 @@ SQL;
         $stmt->execute();
     }
 
-    public static function getFilterSql(array $pollerIds, array $hostTemplateChain = null, array $serviceTemplateChain = null): string
-    {
+    public static function getFilterSql(
+        array $pollerIds,
+        array $hostTemplateChain = null,
+        array $serviceTemplateChain = null
+    ): string {
         // prevent SQL exception
         if (!$pollerIds) {
             return [];

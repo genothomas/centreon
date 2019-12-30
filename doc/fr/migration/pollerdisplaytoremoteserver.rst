@@ -64,14 +64,31 @@ Cette commande va activer le mode **Remote Server** ::
       Limiting Actions...Done
 
       Notifying Master...Success
+
+      Set 'remote' instance type...Done
+
       Centreon Remote enabling finished.
 
-6. Rendez-vous au chapitre :ref:`Échange de clés SSH<sskkeypoller>` pour
-   réaliser les échanges de clés SSH entre votre **Remote Server** et les
-   **collecteurs** rattachés à ce dernier.
+6. Ajout des droits pour l'utilsateur de base de données centreon d'utiliser la commande **LOAD DATA INFILE**::
 
-7. Sur le serveur **Centreon Central**, dans l'interface web Centreon, éditez
-   tous les collecteurs rattachés au **Remote Server** et lier ceux-ci au
+    # mysql -h <database_server_address> -u root -p
+    MariaDB [(none)]> GRANT FILE on *.* to 'centreon'@'<remote_server_ip>';
+
+7. Echange de clé SSH :
+
+Si vous n’avez pas de clé SSH privée sur le serveur central pour
+l’utilisateur ‘centreon’ ::
+
+    # su - centreon
+    $ ssh-keygen -t rsa
+
+Vous devez copier cette clé sur le Remote Server : ::
+
+    # su - centreon
+    $ ssh-copy-id -i .ssh/id_rsa.pub centreon@IP_POLLER
+
+8. Sur le serveur **Centreon Central**, dans l'interface web Centreon, éditez
+   tous les collecteurs rattachés au **Remote Server** et liez ceux-ci au
    nouveau Remote Server via la liste de sélection.
 
 .. note::

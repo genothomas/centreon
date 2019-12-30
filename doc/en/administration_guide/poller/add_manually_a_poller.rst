@@ -1,35 +1,42 @@
 .. _add_manual_poller:
 
-================================
-Manual configuration of a Poller
-================================
+=============================
+Manually configuring a poller
+=============================
 
-Configuration of the server
-===========================
+Configuring the server
+======================
 
-Once the installation is completed, it is necessary to integrate this remote poller into the Centreon configuration.
+Once the installation is complete, you must integrate this remote poller into the Centreon configuration.
 
-#. Go into the menu: **Configuration > Pollers**
-#. Duplicate the central server and edit it
+#. Go into the menu: **Configuration > Pollers**.
+#. Duplicate the central server and edit it.
 #. Change the following settings, and save:
 
-*	Change the name of the **Poller Name**.
+*	Change the name of **Poller Name**.
 *	Enter the IP address of the poller in the **IP Address** field.
 *	Enable the poller by clicking on **Enabled** in the **Status** field.
 
 .. image:: /images/user/configuration/10advanced_configuration/07addpoller.png
    :align: center
 
+.. note::
+    If your poller is attached to a Remote Server, please choose this one in the **Attach to Remote Server** list.
 
-#. Go into the **Configuration > Pollers > Engine configuration** menu
+.. note::
+    If your poller is attached to a Remote Server, but you prefer to send externals commands and configuration
+    directly from the Central server to this poller, please disable the **Use the Remote Server as a proxy for SSH**
+    option.
+
+#. Go to the **Configuration > Pollers > Engine configuration** menu.
 #. Select your last added configuration.
 #. Change the following settings, and save:
 
 * In the **Files** tab:
 
-  * Modify **Configuration Name**
-  * Check that **Linked poller** is the previously created poller
-  * Change if necessary the **Timezone / Location**
+  * Modify **Configuration Name**.
+  * Check that **Linked poller** is the previously created poller.
+  * Change if necessary **Timezone / Location**.
 
 .. image:: /images/user/configuration/10advanced_configuration/07addengine.png
    :align: center
@@ -38,7 +45,7 @@ Once the installation is completed, it is necessary to integrate this remote pol
 
    /usr/lib64/centreon-engine/externalcmd.so
 
-   /usr/lib64/nagios/cbmod.so /etc/centreon-broker/poller-module.xml
+   /usr/lib64/nagios/cbmod.so /etc/centreon-broker/poller-module.json
 
 .. image:: /images/user/configuration/10advanced_configuration/07addpoller_neb.png
    :align: center
@@ -46,29 +53,29 @@ Once the installation is completed, it is necessary to integrate this remote pol
 Centreon Broker configuration
 =============================
 
-It is necessary to generate a configuration file for Centreon Broker:
+You must generate a configuration file for Centreon Broker:
 
-#. Go into the menu: **Configuration > Pollers > Broker configuration**
-#. click on **Add**
+#. Go into the menu: **Configuration > Pollers > Broker configuration**.
+#. click on **Add**.
 
 * In the **General** tab:
 
-  * Select the **Requester**
-  * Set **Name** of the configuration
-  * Set **Config file name ** that should be exactly the same as the one defined in Centreon Engine configuration, for example **poller-module.xml**
-  * Check the value **No** for the **Link to cbd service** option
+  * Select the **Requester**.
+  * Set **Name** of the configuration.
+  * Set **Config file name** that must be exactly the same as the one defined in Centreon Engine configuration (for example, **poller-module.json**).
+  * Check the value **No** for the **Link to cbd service** option.
 
 .. image:: /images/user/configuration/10advanced_configuration/07_Addbroker.png
    :align: center
 
 * In the **Output** tab:
 
-  * Add a new **TCP - IPv4** output
-  * Set the **Name**
-  * Set the distant TCP port, by default **5669**
-  * Set the IP address of the Centreon central server (**Host to connect to**)
+  * Add a new **TCP - IPv4** output.
+  * Set the **Name**.
+  * Set the distant TCP port, by default to **5669**.
+  * Set the IP address of the Central server (**Host to connect to**).
 
 .. image:: /images/user/configuration/10advanced_configuration/07_Addbroker_output.png
    :align: center
 
-* Save the configuration
+* Save the configuration.

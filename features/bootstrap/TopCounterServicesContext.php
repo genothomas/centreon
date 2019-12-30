@@ -87,6 +87,16 @@ class TopCounterServicesContext extends CentreonContext
     {
         $this->visit('/', false);
         $selector = '#' . $chip;
+        $this->spin(
+            function ($context) use ($selector) {
+                return $context->getSession()->getPage()->has(
+                    'css',
+                    $selector
+                );
+            },
+            'Home not load.',
+            5
+        );
         $this->assertFind('css', $selector)->click();
     }
 
@@ -95,6 +105,7 @@ class TopCounterServicesContext extends CentreonContext
      */
     public function iSeeTheListOfServicesFilteredByStatus($status)
     {
+        self::$lastUri = 'p=20201';
         $this->spin(
             function ($context) {
                 $context->switchToIframe();
@@ -115,7 +126,17 @@ class TopCounterServicesContext extends CentreonContext
     public function iClickOnTheServicesIcon()
     {
         $this->visit('/', false);
-        $this->assertFind('css', '.wrap-right-services .icon-services')->click();
+        $this->spin(
+            function ($context) {
+                return $context->getSession()->getPage()->has(
+                    'css',
+                    '[class*="wrap-right-services"] [class*="icon-services"]'
+                );
+            },
+            'Home not load.',
+            5
+        );
+        $this->assertFind('css', '[class*="wrap-right-services"] [class*="icon-services"]')->click();
     }
 
     /**
@@ -125,7 +146,7 @@ class TopCounterServicesContext extends CentreonContext
     {
         $this->spin(
             function ($context) {
-                $element = $context->getSession()->getPage()->find('css', '.submenu.services');
+                $element = $context->getSession()->getPage()->find('css', '[class*="services"] [class*="submenu"]');
                 return $element->isVisible();
             },
             'The summary of services status is not open',

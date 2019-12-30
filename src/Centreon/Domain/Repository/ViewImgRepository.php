@@ -8,7 +8,7 @@ class ViewImgRepository extends ServiceEntityRepository
 
     /**
      * Export
-     * 
+     *
      * @param array $imgList
      * @return array
      */
@@ -57,14 +57,17 @@ SQL;
 
     /**
      * Get a chain of the related objects
-     * 
+     *
      * @param int[] $pollerIds
      * @param int[] $hostTemplateChain
      * @param int[] $serviceTemplateChain
      * @return array
      */
-    public function getChainByPoller(array $pollerIds, array $hostTemplateChain = null, array $serviceTemplateChain = null): array
-    {
+    public function getChainByPoller(
+        array $pollerIds,
+        array $hostTemplateChain = null,
+        array $serviceTemplateChain = null
+    ): array {
         // prevent SQL exception
         if (!$pollerIds) {
             return [];

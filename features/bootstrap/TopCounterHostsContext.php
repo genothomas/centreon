@@ -64,14 +64,25 @@ class TopCounterHostsContext extends CentreonContext
     {
         $this->visit('/', false);
         $selector = '#' . $chip;
+        $this->spin(
+            function ($context) use ($selector) {
+                return $context->getSession()->getPage()->has(
+                    'css',
+                    $selector
+                );
+            },
+            'Home not load.',
+            5
+        );
         $this->assertFind('css', $selector)->click();
     }
 
     /**
      * @Then I see the list of hosts filtered by status :status
      */
-    public function iSeeTheListOfServicesFilteredByStatus($status)
+    public function iSeeTheListOfHostsFilteredByStatus($status)
     {
+        self::$lastUri = 'p=20202';
         $this->spin(
             function ($context) {
                 $context->switchToIframe();
@@ -92,7 +103,17 @@ class TopCounterHostsContext extends CentreonContext
     public function iClickOnTheHostsIcon()
     {
         $this->visit('/', false);
-        $this->assertFind('css', '.wrap-right-hosts .icon-hosts')->click();
+        $this->spin(
+            function ($context) {
+                return $context->getSession()->getPage()->has(
+                    'css',
+                    '[class*="wrap-right-hosts"] [class*="icon-hosts"]'
+                );
+            },
+            'Home not load.',
+            5
+        );
+        $this->assertFind('css', '[class*="wrap-right-hosts"] [class*="icon-hosts"]')->click();
     }
 
     /**
@@ -102,7 +123,7 @@ class TopCounterHostsContext extends CentreonContext
     {
         $this->spin(
             function ($context) {
-                $element = $context->getSession()->getPage()->find('css', '.submenu.host');
+                $element = $context->getSession()->getPage()->find('css', '[class*="hosts"] [class*="submenu"]');
                 return $element->isVisible();
             },
             'The summary of hosts status is not open',

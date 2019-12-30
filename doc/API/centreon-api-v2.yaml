@@ -1,0 +1,2046 @@
+openapi: 3.0.1
+info:
+  title: Centron API
+  description: |
+    **Centron API v2**
+    # New features
+    + Added real-time monitoring for hosts and services
+    + Added acknowledgement for hosts and services
+    + Added downtimes for hosts and services
+    + Added the list of monitoring server configurations
+    + Added the proxy configuration
+    # Information
+    All dates are in **ISO 8601** format
+    # Authentication
+    There are two modes of authentication:
+    * By token: after identification with your login credentials
+    * By cookie: by reusing a valid session ID
+  x-logo:
+    url: ./centreon-logo.png
+  contact:
+    url: 'https://www.centreon.com'
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+  version: 2.0.0
+externalDocs:
+  description: You can contact us on our community Slack
+  url: 'https://centreon.slack.com/messages/CCRGLQSE5'
+servers:
+  - url: 'http://{server}/centreon/api/{version}'
+    variables:
+      server:
+        default: localhost
+      version:
+        default: beta
+        enum:
+          - latest
+          - beta
+          - v2
+tags:
+  - name: Acknowledgements
+    description: |
+      This API allow to:
+      * Show the latest acknowledgement for host or service
+      * Acknowledge a host or a service
+      * Cancel an acknowledgement of host or service
+  - name: Authentication
+  - name: MonitoringServer
+    description: |
+      This API allow to:
+      * Show the monitoring server configurations
+  - name: Proxy
+    description: |
+      This API allow to:
+      * Show the default proxy configuration of Centreon
+      * Update the default proxy configuration of Centreon
+  - name: Downtime
+    description: |
+      This API allow to:
+      * Show hosts and services downtimes
+      * Add a downtime on host or service
+      * Cancel a downtime of host or service
+  - name: Monitoring
+    description: Real-time monitoring of the services and hosts
+security:
+  - Token: []
+  - Cookie: []
+paths:
+  /acknowledgements/hosts:
+    get:
+      tags:
+        - Acknowledgements
+      summary: List the latest acknowledgement of each host
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/search'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Acknowledgement.Host'
+                  meta:
+                    $ref: '#/components/schemas/Meta'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+    post:
+      tags:
+        - Acknowledgements
+      summary: Adds an acknowledgement on host
+      requestBody:
+        description: Acknowledgment
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Acknowledgement.Host.Add'
+      responses:
+        204:
+          description: Command sent
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+  /acknowledgements/hosts/{host_id}:
+    delete:
+      tags:
+        - Acknowledgements
+      summary: Cancel an acknowledgement on host
+      parameters:
+        - name: host_id
+          in: path
+          description: ID of host for which you want to cancel acknowledgement
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        204:
+          description: Command sent
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+  /acknowledgements/services:
+    get:
+      tags:
+        - Acknowledgements
+      summary: List the latest acknowledgement of each service
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/search'
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Acknowledgement.Service'
+                  meta:
+                    $ref: '#/components/schemas/Meta'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+    post:
+      tags:
+        - Acknowledgements
+      summary: Adds an acknowledgement on service
+      requestBody:
+        description: Acknowledgment
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Acknowledgement.Service.Add'
+      responses:
+        204:
+          description: Command sent
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+  /acknowledgements/hosts/{host_id}/services/{service_id}:
+    delete:
+      tags:
+        - Acknowledgements
+      summary: Cancel an acknowledgement on service
+      parameters:
+        - name: host_id
+          in: path
+          description: ID of host linked to service
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: service_id
+          in: path
+          description: ID of service for which you want to cancel acknowledgement
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        204:
+          description: Command sent
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+  /configuration/monitoring-servers:
+    get:
+      tags:
+        - MonitoringServer
+      summary: List all monitoring server configurations
+      description: |
+        List all monitoring server configurations
+
+        The available parameters to **search** / **sort_by** are:
+
+          * id
+          * name
+          * is_localhost
+          * address
+          * is_activate
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/search'
+      responses:
+          200:
+            description: successful operation
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    result:
+                      type: array
+                      items:
+                        allOf:
+                          - $ref: '#/components/schemas/Configuration.MonitoringServer.main'
+                    meta:
+                      $ref: '#/components/schemas/Meta'
+          403:
+            description: Forbidden
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ForbiddenApiResponse'
+          500:
+            description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ErrorApiResponse'
+  /configuration/proxy:
+    get:
+      tags:
+        - Proxy
+      summary: Display the default configuration of the Centreon proxy
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Configuration.Proxy'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+    post:
+      tags:
+        - Proxy
+      summary: Update the default configuration of the Centreon proxy
+      requestBody:
+        description: Proxy configuration
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Configuration.Proxy'
+      responses:
+        204:
+          description: Command sent
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+  /monitoring/hosts/downtimes:
+    get:
+      tags:
+        - Downtime
+      summary: List all hosts downtimes
+      description: |
+        List all downtimes of hosts
+
+        The available parameters to **search** / **sort_by** are:
+
+          * id
+          * entry_time
+          * is_cancelled
+          * comment
+          * deletion_time
+          * duration
+          * end_time
+          * is_fixed
+          * start_time
+          * host.id
+          * host.name
+          * host.alias
+          * host.address
+          * host.display_name
+          * host.state
+          * poller.id
+          * contact.id
+          * contact.name
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/search'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Downtime.Host'
+                  meta:
+                    $ref: '#/components/schemas/Meta'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+  /monitoring/hosts/{host_id}/downtimes:
+    get:
+      tags:
+        - Downtime
+      summary: List all downtimes of one host
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/search'
+        - name: show_services
+          in: query
+          description: |
+            Indicates whether we need to display the host-related services downtimes or not (by default: **false**)
+          schema:
+            type: boolean
+        - name: host_id
+          in: path
+          description: ID of host
+          required: true
+          schema:
+            type: integer
+            format: int64
+      description: |
+        List all downtimes of one host
+
+        The available parameters to **search** / **sort_by** are:
+
+          * id
+          * entry_time
+          * is_cancelled
+          * comment
+          * deletion_time
+          * duration
+          * end_time
+          * is_fixed
+          * start_time
+          * contact.id
+          * contact.name
+
+        By default, the host-related **services** downtimes are not displayed.
+        To display them, set the URI parameter "show_services" to `true`.
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Downtime.Host'
+                  meta:
+                    $ref: '#/components/schemas/Meta'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+    post:
+      tags:
+        - Downtime
+      summary: Add a downtimes of one host
+      requestBody:
+        description: Downtime
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Downtime.Host.Add'
+      parameters:
+        - name: host_id
+          in: path
+          description: ID of host
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        204:
+          description: Command sent
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+  /monitoring/services/downtimes:
+    get:
+      tags:
+        - Downtime
+      summary: List all services downtimes
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/search'
+      description: |
+        List all downtimes of services
+
+        The available parameters to **search** / **sort_by** are:
+
+          * id
+          * entry_time
+          * is_cancelled
+          * comment
+          * deletion_time
+          * duration
+          * end_time
+          * is_fixed
+          * start_time
+          * host.id
+          * host.name
+          * host.alias
+          * host.address
+          * host.display_name
+          * host.state
+          * poller.id
+          * contact.id
+          * contact.name
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Downtime.Service'
+                  meta:
+                    $ref: '#/components/schemas/Meta'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+  /monitoring/hosts/{host_id}/services/{service_id}/downtimes:
+    get:
+      tags:
+        - Downtime
+      summary: List all downtimes of one host-related service
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/search'
+        - name: host_id
+          in: path
+          description: ID of host
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: service_id
+          in: path
+          description: ID of service linked to the host
+          required: true
+          schema:
+            type: integer
+            format: int64
+      description: |
+        List all downtimes of one host-related service
+
+        The available parameters to **search** / **sort_by** are:
+
+          * id
+          * entry_time
+          * is_cancelled
+          * comment
+          * deletion_time
+          * duration
+          * end_time
+          * is_fixed
+          * start_time
+          * contact.id
+          * contact.name
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Downtime.Service'
+                  meta:
+                    $ref: '#/components/schemas/Meta'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+    post:
+      tags:
+        - Downtime
+      summary: Add a downtime of one host-related service
+      parameters:
+        - name: host_id
+          in: path
+          description: ID of host
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: service_id
+          in: path
+          description: ID of service linked to the host
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Downtime
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Downtime.Service.Add'
+      responses:
+        204:
+          description: Command sent
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+  /monitoring/downtimes:
+    get:
+      tags:
+        - Downtime
+      summary: List all downtimes
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/search'
+      description: |
+        List all downtimes
+
+        The available parameters to **search** / **sort_by** are:
+
+          * id
+          * entry_time
+          * is_cancelled
+          * comment
+          * deletion_time
+          * duration
+          * end_time
+          * is_fixed
+          * start_time
+          * host.id
+          * host.name
+          * host.alias
+          * host.address
+          * host.display_name
+          * host.state
+          * poller.id
+          * contact.id
+          * contact.name
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Downtime.Service'
+                  meta:
+                    $ref: '#/components/schemas/Meta'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+  /monitoring/downtimes/{downtime_id}:
+    get:
+      tags:
+        - Downtime
+      summary: Display one downtime
+      parameters:
+        - name: downtime_id
+          in: path
+          description: ID of downtime
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Downtime.Service'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+    delete:
+      tags:
+        - Downtime
+      summary: Cancel a downtime
+      parameters:
+        - name: downtime_id
+          in: path
+          description: ID of downtime
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        204:
+          description: Command sent
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: Login
+      description: Entry point to retrieve an authentication token.
+      security:
+        - Token: []
+      requestBody:
+        description: Authentication schema
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AuthenticationRequest'
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginAuthenticationResponse'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+  /logout:
+    get:
+      tags:
+        - Authentication
+      summary: Logout
+      description: Entry point to delete an existing authentication token.
+      security:
+        - Token: []
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogoutAuthenticationResponse'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+  /monitoring/hostgroups:
+    get:
+      tags:
+        - Monitoring
+      summary: List all services grouped by host groups
+      description: |
+        Returns all services grouped by host groups.
+
+        The available parameters to **search** / **sort_by** are:
+
+        * host.id
+        * host.name
+        * host.alias
+        * host.address
+        * host.state
+        * poller.id
+        * service.display_name
+        * host_group.id
+
+        # Information
+        By default, the **hosts** property of hostgroup object is not displayed.
+        To display it, set the URI parameter "show_host" to `true`.
+
+        `/monitoring/hostgroups?show_host=true`
+
+        By default, the **services** property of host object is not displayed.
+        To display it, set the URI parameter "show_service" to `true`.
+
+        `/monitoring/hostgroups?show_service=true`
+
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/search'
+        - name: show_service
+          in: query
+          description: |
+            Allows to display services belonging to hosts belonging to requested hostgroups (by default: **false**)
+          schema:
+            type: boolean
+        - name: show_host
+          in: query
+          description: |
+            Allows to display hosts belonging to hostgroups (by default: **false**)
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Monitoring.HostGroup'
+                  meta:
+                    $ref: '#/components/schemas/Meta'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+  /monitoring/hosts:
+    get:
+      tags:
+        - Monitoring
+      summary: List all hosts
+      description: |
+        Returns all hosts.
+
+        The available parameters to **search** / **sort_by** are:
+
+        * host.id
+        * host.name
+        * host.alias
+        * host.address
+        * host.state
+        * poller.id
+        * service.display_name
+        * host_group.id
+
+        # Information
+        By default, the **services** property of host object is not displayed.
+        To display it, set the URI parameter "show_service" to `true`.
+
+        `/monitoring/hosts?show_service=true`
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/search'
+        - name: show_service
+          in: query
+          description: |
+            Allows to display services belonging to hosts (by default: **false**)
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Monitoring.Host_main'
+                  meta:
+                    $ref: '#/components/schemas/Meta'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+  /monitoring/hosts/{hostId}:
+    get:
+      tags:
+        - Monitoring
+      summary: Find host by ID
+      description: |
+        Retuns a single host with full details and some details about its services
+      parameters:
+        - name: hostId
+          in: path
+          description: ID of host to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Monitoring.Host_full'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        404:
+          description: Host not found
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+  /monitoring/hosts/{hostId}/services:
+    get:
+      tags:
+        - Monitoring
+      summary: Find host-related services
+      description: |
+        Returns all services associated with a host.
+
+        The available parameters to **search** / **sort_by** are:
+
+        * service.id
+        * service.description
+        * service.display_name
+        * service_group.id
+        * service.is_acknowledged
+        * service.state
+      parameters:
+        - name: hostId
+          in: path
+          description: Host Id for which we want to get its associated services
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/search'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Monitoring.Service_main'
+                  meta:
+                    $ref: '#/components/schemas/Meta'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        404:
+          description: Host not found
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+  /monitoring/hosts/{hostId}/services/{serviceId}:
+    get:
+      tags:
+        - Monitoring
+      summary: Find service by ID related to a host
+      description: Retuns a single host with full details
+      parameters:
+        - name: hostId
+          in: path
+          description: Host Id for which service is associed
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: serviceId
+          in: path
+          description: ID of service to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Monitoring.Service_full'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        404:
+          description: Host or service not found
+          content: {}
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+  /monitoring/servicegroups:
+    get:
+      tags:
+        - Monitoring
+      summary: List all services grouped by service groups
+      description: |
+        Returns all services grouped by service groups.
+
+        The available parameters to **search** / **sort_by** are:
+
+        * host.id
+        * host.name
+        * host.alias
+        * host.address
+        * host.state
+        * poller.id
+        * service.display_name
+        * service_group.id
+        * service_group.name
+
+        # Information
+        By default, the **hosts** property of service group object is not displayed.
+        To display it, set the URI parameter "show_host" to `true`.
+
+        `/monitoring/hostgroups?show_host=true`
+
+        By default, the **services** property of host object is not displayed.
+        To display it, set the URI parameter "show_service" to `true`.
+
+        `/monitoring/hostgroups?show_service=true`
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/search'
+        - name: show_service
+          in: query
+          description: |
+            Allows to display services belonging to servicegroups (by default: **false**)
+          schema:
+            type: boolean
+        - name: show_host
+          in: query
+          description: |
+            Allows to display hosts related to services belonging to servicegroups (by default: **false**)
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Monitoring.ServiceGroup'
+                  meta:
+                    $ref: '#/components/schemas/Meta'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+  /monitoring/services:
+    get:
+      tags:
+        - Monitoring
+      summary: List all services
+      description: |
+        Returns all services.
+
+
+        The available parameters to **search** / **sort_by** are:
+
+        * host.id
+        * host.name
+        * host.alias
+        * host.address
+        * host.state
+        * host_group.id
+        * service.display_name
+        * service.description
+        * service.is_acknowledged
+        * service.output
+        * service.state
+        * service_group.id
+        * poller.id
+      parameters:
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/sortBy'
+        - $ref: '#/components/parameters/search'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      allOf:
+                        - $ref: '#/components/schemas/Monitoring.Service_main'
+                        - $ref: '#/components/schemas/Monitoring.Service_with_host'
+                  meta:
+                    $ref: '#/components/schemas/Meta'
+        403:
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ForbiddenApiResponse'
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorApiResponse'
+components:
+  parameters:
+    limit:
+      in: query
+      name: limit
+      required: false
+      description: Max items per pages
+      schema:
+        $ref: '#/components/schemas/RequestParameters.limit'
+    page:
+      in: query
+      name: page
+      required: false
+      description: Number of the page requested
+      schema:
+        $ref: '#/components/schemas/RequestParameters.page'
+    sortBy:
+      in: query
+      name: sort_by
+      required: false
+      description: Used to sort the request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RequestParameters.sortBy'
+    search:
+      in: query
+      name: search
+      required: false
+      description: Used to search with specifics parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RequestParameters.search'
+  schemas:
+    Meta:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: Number of the pagined page
+        limit:
+          type: integer
+          description: Number of items per page
+        search:
+          type: object
+          description: Search parameter pass to url
+        sort_by:
+          type: object
+          description: Sort parameter pass to url
+        total:
+          type: integer
+          description: Number of items found
+    Configuration.MonitoringServer.main:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique id of server
+        name:
+          type: string
+          description: Name of server
+        address:
+          type: string
+          description: IP address of server
+        is_localhost:
+          type: boolean
+          description: Indicates whether it's the localhost server
+        is_default:
+          type: boolean
+          description: Indicates whether it's the default server
+        ssh_port:
+          type: integer
+          description: SSH port of this server
+          example: 22
+        last_restart:
+          type: string
+          format: date-time
+          description: Date of the last Engine restart request
+        engine_start_command:
+          type: string
+          description: System start command for Engine
+        engine_stop_command:
+          type: string
+          description: System stop command for Engine
+        engine_restart_command:
+          type: string
+          description: System restart command for Engine
+        engine_reload_command:
+          type: string
+          description: System reload command for Engine
+        nagios_bin:
+          type: string
+          description: Full path of the Engine binary
+        nagiostats_bin:
+          type: string
+          description: Full path of the Engine statistics binary
+        broker_reload_command:
+          type: string
+          description: System reload command for Broker
+        centreonbroker_cfg_path:
+          type: string
+          description: Full path of the Broker configuration
+        centreonbroker_module_path:
+          type: string
+          description: Full path of the Broker module's libraries
+        centreonbroker_logs_path:
+          type: string
+          description: Full path of the Broker logs
+        centreonconnector_path:
+          type: string
+          description: Full path of the Engine connectors
+        init_script_centreontrapd:
+          type: string
+          description: System name of Centreontrapd daemon
+        snmp_trapd_path_conf:
+          type: string
+          description: Full path of the Centreontrapd daemon configuration
+        remote_id:
+          type: integer
+          description: Unique ID of the master Remote Server linked to the server
+        remote_server_centcore_ssh_proxy:
+          type: boolean
+          description: Indicates whether Remote Servers are used as SSH proxies
+        is_updated:
+          type: boolean
+          description: Indicates whether the monitoring configuration has changed since last restart
+        is_activate:
+          type: boolean
+          description: Indicates whether the server configuration is activated
+    RequestParameters.limit:
+      type: integer
+      minimum: 1
+      example: 20
+    RequestParameters.page:
+      type: integer
+      minimum: 1
+      example: 1
+    RequestParameters.sortBy:
+      type: object
+      example: {"host.name": "ASC"}
+    RequestParameters.search:
+      type: object
+      example: {"host.name": "localhost"}
+    ForbiddenApiResponse:
+      type: object
+      properties:
+        message:
+          type: string
+    ErrorApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+    Acknowledgement.Host:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique acknowledgement id
+        author_id:
+          type: integer
+          format: int64
+          description: Unique id of the contact who requested an acknowledgement
+        comment:
+          type: string
+          description: Short description of the acknowledgement
+        deletion_time:
+          type: string
+          format: date-time
+          description: Date of the request for cancellation of the acknowledgement (ISO8601)
+        entry_time:
+          type: string
+          format: date-time
+          description: Date of the request for acknowledgement (ISO8601)
+        host_id:
+          type: integer
+          format: int64
+          description: Unique id of the host to acknowledge
+        poller_id:
+          type: integer
+          format: int64
+          description: Unique id of the poller
+        is_notify_contacts:
+          type: boolean
+          description: Indicates whether notification is send to the contacts linked to the host or service
+        is_persistent_comment:
+          type: boolean
+          description: Indicates whether acknowledgement is maintained in the case of a restart of the scheduler
+        is_sticky:
+          type: boolean
+          description: Indicates whether acknowledgement is maintained in the case of a change of status
+        state:
+          type: integer
+          description: |
+            State type
+             * `1` - WARNING
+             * `2` - CRITICAL
+             * `3` - UNKNOWN
+    Acknowledgement.Service:
+      allOf:
+        - $ref: '#/components/schemas/Acknowledgement.Host'
+        - type: object
+          properties:
+            host_id:
+              type: integer
+              format: int64
+              description: Unique id of the host linked to the service
+            service_id:
+              type: integer
+              format: int64
+              description: Unique id of the service to acknowledge
+    Acknowledgement.Host.Add:
+      type: object
+      properties:
+        comment:
+          type: string
+          description: Short description of the acknowledgement
+        host_id:
+          type: integer
+          format: int64
+          description: Unique id of the host
+        is_notify_contacts:
+          type: boolean
+          description: Indicates whether notification is send to the contacts linked to the host or service
+        is_persistent_comment:
+          type: boolean
+          description: Indicates whether acknowledgement is maintained in the case of a restart of the scheduler
+        is_sticky:
+          type: boolean
+          description: Indicates whether acknowledgement is maintained in the case of a change of status
+    Acknowledgement.Service.Add:
+      allOf:
+        - $ref: '#/components/schemas/Acknowledgement.Host.Add'
+        - type: object
+          properties:
+            service_id:
+              type: integer
+              format: int64
+              description: Unique id of the service to acknowledge
+    AuthenticationRequest:
+      type: object
+      properties:
+        security:
+          type: object
+          properties:
+            credentials:
+              type: object
+              properties:
+                login:
+                  type: string
+                  description: Login
+                password:
+                  type: string
+                  description: password
+    Downtime.Host.Add:
+      allOf:
+        - $ref: '#/components/schemas/Downtime.Service.Add'
+        - type: object
+          properties:
+            with_services:
+              type: boolean
+              description: Indicates whether we should add the downtime on the host-related services
+    Downtime.Service.Add:
+      type: object
+      properties:
+        start_time:
+          type: string
+          format: date-time
+          description: Scheduled start date of the downtime (ISO8601)
+        end_time:
+          type: string
+          format: date-time
+          description: Scheduled end date of the downtime (ISO8601)
+        is_fixed:
+          type: boolean
+          description: Indicates whether the downtime is fixed
+        duration:
+          type: integer
+          description: Downtime duration in seconds
+        author_id:
+          type: integer
+          description: Requester id
+        comment:
+          type: string
+          description: Comment of the downtime
+    Downtime.Host:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Downtime id
+        author_id:
+          type: integer
+          description: Requester id
+        host_id:
+          type: integer
+          description: Host id of the downtime
+        comment:
+          type: string
+          description: Comment of the downtime
+        duration:
+          type: integer
+          description: Downtime duration in seconds
+        entry_time:
+          type: string
+          format: date-time
+          description: Date of the request to create the downtime (ISO8601)
+        start_time:
+          type: string
+          format: date-time
+          description: Scheduled start date of the downtime (ISO8601)
+        end_time:
+          type: string
+          format: date-time
+          description: Scheduled end date of the downtime (ISO8601)
+        deletion_time:
+          type: string
+          format: date-time
+          description: Date of cancellation of downtime (ISO8601)
+        actual_start_time:
+          type: string
+          format: date-time
+          description: Start date of the downtime (ISO8601)
+        actual_end_time:
+          type: string
+          format: date-time
+          description: End date of the downtime (ISO8601)
+        is_started:
+          type: boolean
+          description: Indicates whether the downtime has started
+        is_cancelled:
+          type: boolean
+          description: Indicates whether the downtime has been cancelled
+        is_fixed:
+          type: boolean
+          description: Indicates whether the downtime is fixed
+    Downtime.Service:
+      allOf:
+        - $ref: '#/components/schemas/Downtime.Host'
+        - type: object
+          properties:
+            service_id:
+              type: integer
+              description: Service id of the downtime
+    LoginAuthenticationResponse:
+      type: object
+      properties:
+        contact:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: Contact id
+            name:
+              type: string
+              description: Contact name
+            alias:
+              type: string
+              description: Alias of the contact
+            email:
+              type: string
+              format: email
+              description: Email of the contact
+            is_admin:
+              type: boolean
+              description: Indicates whether it is an admin user or not
+        security:
+          type: object
+          properties:
+            token:
+              type: string
+              description: Security authentication token
+    LogoutAuthenticationResponse:
+      type: object
+      properties:
+        message:
+          type: string
+    Monitoring.HostGroup:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique id of the host group
+        name:
+          type: string
+          description: Name of the host group
+        host:
+          allOf:
+            - $ref: '#/components/schemas/Monitoring.Host_min'
+            - $ref: '#/components/schemas/Monitoring.Host_with_service'
+    Monitoring.Host_min:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique host id
+        alias:
+          type: string
+          description: Host alias
+        display_name:
+          type: string
+          description: Host display name
+        name:
+          type: string
+          description: Host name
+        state:
+          type: integer
+          description: |
+            Host state
+             * `0` - UP
+             * `1` - DOWN
+             * `2` - UNREACHABLE
+             * `4` - PENDING
+    Monitoring.Host_full:
+      allOf:
+        - $ref: '#/components/schemas/Monitoring.Host_main'
+        - type: object
+          properties:
+            active_checks:
+              type: boolean
+              description: Indicates whether active checks are enabled for the host
+            check_command:
+              type: string
+              description: Command name used for active checks
+            check_interval:
+              type: number
+              format: float
+              description: Interval between two checks
+            check_period:
+              type: string
+              description: Name of the check period
+            check_type:
+              type: integer
+              description: |
+                Type of the last check
+                  * `0` - Active
+                  * `1` - Passive
+            last_hard_state:
+              type: string
+              format: date-time
+              description: Date of the last hard state (ISO8601)
+            last_notification:
+              type: string
+              format: date-time
+              description: Date of the last notification (ISO8601)
+            latency:
+              type: string
+              format: float
+              description: >-
+                Time difference between scheduled check time and actual check
+                time
+            next_check:
+              type: string
+              format: date-time
+              description: Scheduled date for the next check (ISO8601)
+            next_host_notification:
+              type: integer
+              description: ...
+            notification_interval:
+              type: number
+              format: float
+              description: Interval of periodic notification or `0` if its off
+            notification_number:
+              type: integer
+              description: Current notification number
+            notify:
+              type: boolean
+              description: Indicates whether notifications of the host are enabled
+            notify_on_down:
+              type: boolean
+              description: >-
+                Indicates whether notifications of the host are enabled when the
+                host is down
+            notify_on_downtime:
+              type: boolean
+              description: >-
+                Indicates whether notifications of the host are enabled when the
+                host is down due to scheduling.
+            notify_on_flapping:
+              type: boolean
+              description: >-
+                Indicates whether notifications of the host are enabled when the
+                host flapping
+            notify_on_recovery:
+              type: boolean
+              description: >-
+                Indicates whether notifications of the host are enabled when the
+                host is recovery
+            notify_on_unreachable:
+              type: boolean
+              description: >-
+                Indicates whether notifications of the host are enabled when the
+                host is unreachable
+    Monitoring.Host_main:
+      allOf:
+        - $ref: '#/components/schemas/Monitoring.Host_min'
+        - $ref: '#/components/schemas/Monitoring.Host_with_service'
+        - type: object
+          properties:
+            poller_id:
+              type: integer
+              format: int64
+              description: Unique poller id for which the host is linked
+            acknowledged:
+              type: boolean
+              description: Indicates whether the last status was acknowledged
+            address_ip:
+              type: string
+              format: ipv4
+              description: IP address of the host
+            check_attempt:
+              type: integer
+              description: Number of the current check attempt
+            checked:
+              type: boolean
+              description: Indicates whether the host is checked
+            execution_time:
+              type: number
+              format: float
+              description: Execution time to check the host
+            icon_image:
+              type: string
+              description: File of the icon used to represent this host
+            icon_image_alt:
+              type: string
+              description: Alternative text of the icon representing the host
+            last_check:
+              type: string
+              format: date-time
+              description: Date of last check (ISO8601)
+            last_hard_state_change:
+              type: string
+              format: date-time
+              description: Date of the last hard state change (ISO8601)
+            last_state_change:
+              type: string
+              format: date-time
+              description: Date of the last state change (soft or hard) (ISO8601)
+            last_time_down:
+              type: string
+              format: date-time
+              description: The last time the host was DOWN (ISO8601)
+            last_time_unreachable:
+              type: string
+              format: date-time
+              description: The last time the host was UNREACHABLE (ISO8601)
+            last_time_up:
+              type: string
+              format: date-time
+              description: The last time the host was UP (ISO8601)
+            last_update:
+              type: string
+              format: date-time
+              description: Date of last update (ISO8601)
+            max_check_attempts:
+              type: integer
+              format: int64
+              description: >-
+                Max check attempts for active host check. (before changing the
+                state type to HARD)
+            output:
+              type: string
+              description: Output of the last host check
+            passive_checks:
+              type: boolean
+              description: Indicates whether the check script is passive or not
+            state_type:
+              type: integer
+              description: |
+                State type
+                 * `0` - SOFT
+                 * `1` - HARD
+            timezone:
+              type: string
+              description: Timezone used for dates
+              example: ':Europe/Paris'
+    Monitoring.Host_with_service:
+      type: object
+      properties:
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/Monitoring.Service_min'
+    Monitoring.ServiceGroup:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique id of the service group
+        name:
+          type: string
+          description: Name of the service group
+        host:
+          allOf:
+            - $ref: '#/components/schemas/Monitoring.Host_min'
+            - $ref: '#/components/schemas/Monitoring.Host_with_service'
+    Monitoring.Service_min:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique service id
+        description:
+          type: string
+          description: Service description
+        display_name:
+          type: string
+          description: Service display name
+        state:
+          type: integer
+          description: |
+            The current state of the service
+              * `0` - OK
+              * `1` - WARNING
+              * `2` - CRITICAL
+              * `3` - UNKNOWN
+              * `4` - PENDING
+    Monitoring.Service_main:
+      allOf:
+        - $ref: '#/components/schemas/Monitoring.Service_min'
+        - type: object
+          properties:
+            check_attempt:
+              type: integer
+              format: int64
+              description: Number of the current check attempt
+            icon_image:
+              type: string
+              description: File name of the icon representing the service
+            icon_image_alt:
+              type: string
+              description: Alternative text of the icon representing the service
+            last_check:
+              type: string
+              format: date-time
+              description: Date of last check (ISO8601)
+            last_state_change:
+              type: string
+              format: date-time
+              description: Date of the last state change (ISO8601)
+            max_check_attempts:
+              type: integer
+              description: Max check attempts
+            output:
+              type: string
+              description: Output of the last service check
+            state_type:
+              type: integer
+              description: |
+                Type of the current state
+                  * `0` - SOFT
+                  * `1` - HARD
+    Monitoring.Service_full:
+      allOf:
+        - $ref: '#/components/schemas/Monitoring.Service_main'
+        - type: object
+          properties:
+            check_command:
+              type: string
+              description: Command name used for active checks
+            check_interval:
+              type: number
+              format: float
+              description: Interval between two scheduled checks of the service
+            check_period:
+              type: string
+              description: Name of the check period
+            check_type:
+              type: integer
+              description: |
+                Type of the last check
+                  * `0` - Active
+                  * `1` - Passive
+            command_line:
+              type: string
+              description: Command used for active checks
+            execution_time:
+              type: number
+              format: float
+              description: Execution time to check the service
+            is_acknowledged:
+              type: boolean
+              description: Indicates whether the last status was acknowledged
+            is_active_check:
+              type: boolean
+              description: Indicates whether active checks are enabled for the service
+            is_checked:
+              type: boolean
+              description: ...
+            last_hard_state_change:
+              type: string
+              format: date-time
+              description: Date of the last hard state change (ISO8601)
+            last_notification:
+              type: string
+              format: date-time
+              description: Date of the last notification (ISO8601)
+            last_time_critical:
+              type: string
+              format: date-time
+              description: The last time the service was CRITICAL (ISO8601)
+            last_time_ok:
+              type: string
+              format: date-time
+              description: The last time the service was OK (ISO8601)
+            last_time_unknown:
+              type: string
+              format: date-time
+              description: The last time the service was UNKNOWN (ISO8601)
+            last_time_warning:
+              type: string
+              format: date-time
+              description: The last time the service was WARNING (ISO8601)
+            last_update:
+              type: string
+              format: date-time
+              description: Date of the last update (ISO8601)
+            latency:
+              type: number
+              format: float
+              description: >-
+                Time difference between scheduled check time and actual check
+                time
+            next_check:
+              type: string
+              format: date-time
+              description: Scheduled date for the next check (ISO8601)
+            performance_data:
+              type: string
+              description: Performance data of the last check plugin
+            scheduled_downtime_depth:
+              type: integer
+              description: Number of scheduled downtimes the service is currently in
+    Monitoring.Service_with_host:
+      type: object
+      properties:
+        hosts:
+          type: object
+          $ref: '#/components/schemas/Monitoring.Host_min'
+    Configuration.Proxy:
+      type: object
+      required:
+        - url
+        - port
+        - user
+        - password
+      properties:
+        url:
+          type: string
+          description: Url of the proxy
+        port:
+          type: integer
+          description: Port of the proxy
+          minimum: 0
+          maximum: 65535
+        user:
+          type: string
+          description: Login of the proxy
+        password:
+          type: string
+          description: Password of the proxy
+  securitySchemes:
+    Token:
+      description: |
+        The use of the API requires a security token.
+
+        To retrieve it, you will need to authenticate yourself with your login credentials.
+
+        The token will be deleted if it has not been used for more than one hour.
+      type: apiKey
+      name: X-AUTH-TOKEN
+      in: header
+    Cookie:
+      description: |
+        If you have already connected on the Centreon web application, you can reused the PHPSESSID cookie.
+
+        The cookie will be valid as long as the connection to Centreon is maintained.
+      type: apiKey
+      name: PHPSESSID
+      in: cookie

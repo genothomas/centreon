@@ -1,4 +1,10 @@
 <!--
+
+Centreon's Code of Conduct must be respected when opening any issue. (https://github.com/centreon/centreon/blob/master/CODE_OF_CONDUCT.md)
+
+If you want to ask a question feel free to use on of those ressources
+slack: https://centreon.github.io/register-slack
+
 If you are reporting a new issue, make sure that we do not have any duplicates already open. You 
 can ensure this by searching the issue list for this repository. If there is a duplicate, please 
 close your issue and add a comment linking to the existing issue instead.
@@ -14,31 +20,79 @@ in the next 30 days, the ticket will be automaticaly closed.
 Please describe your issue in English.
 -->
 
----------------------------------------------------
-BUG REPORT INFORMATION
----------------------------------------------------
+# BUG REPORT INFORMATION
 
-**Centreon Web version**: 
+### Prerequisites
 
-**Centreon Engine version**: 
+> The opened issue, must be code related. GitHub is not meant for support. Feel free to check the CONTRIBUTING section for more details.
 
-**Centreon Broker version**: 
+***Versions***
 
-**OS**: 
+For the RPM based systems
 
-**Additional environment details (AWS, VirtualBox, physical, etc.):**
+-- Copy/Paste the result of the following command --
+```
+$ rpm -qa | grep centreon
+```
 
+For the deb based systems
 
-**Steps to reproduce the issue:**
-1.
-2.
-3.
+-- Copy/Paste the result of the following command --
+```
+$ dpkg -l | grep centreon
+```
+***Operating System***
 
+*CentOS, Debian ...*
 
-**Describe the results you received:**
+***Browser used***
 
+- [ ] Google Chrome
+- [ ] Firefox
+- [ ] Internet Explorer IE11
+- [ ] Safari
 
-**Describe the results you expected:**
+Version: --
 
+***Additional environment details (AWS, VirtualBox, physical, etc.):***
 
-**Additional information you think important (e.g. issue happens only occasionally):**
+### Description
+
+-- Describe the encountered issue --
+
+### Steps to Reproduce
+
+Please describe precisely the steps to reproduce the encountered issue.
+
+1. I logged in Centreon
+2. I reached the Custom View
+3. And so on...
+
+### Describe the received result
+
+### Describe the expected result
+
+### Logs
+
+**PHP error logs**
+
+```
+tail -f /var/opt/rh/rh-php71/log/php-fpm/centreon-error.log
+```
+**centreon-engine logs (*if needed*)**
+
+```
+tail -f /var/log/centreon-engine/centengine.log
+```
+**centreon-broker logs (*if needed*)**
+
+```
+tail -f /var/log/centreon-broker/central-broker-master.log
+```
+**centcore logs (*if needed*)**
+
+```
+tail -f /var/log/centreon/centcore.log
+```
+
+### Additional relevant information (e.g. frequency, ...)
